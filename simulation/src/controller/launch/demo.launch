@@ -1,0 +1,10 @@
+<?xml version="" ?>
+
+<launch>
+    <include file="$(find q_learning)/launch/demo.launch" />
+    <include file="$(find rotors_gazebo)/launch/mav.launch">
+        <arg name="paused" default="false" />
+    </include>
+
+    <node name="controller" pkg="controller" type="controller" output="screen" />
+</launch>

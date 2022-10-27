@@ -1,0 +1,5 @@
+<?xml version="" ?>
+
+<launch>
+    <node name="learner" pkg="q_learning" type="learner" output="screen" />
+</launch>
