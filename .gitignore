@@ -1,4 +1,8 @@
 .vscode
+
+.catkin_tools
 build
 devel
 logs
+
+Paper.pdf
