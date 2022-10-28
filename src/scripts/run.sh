@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /bin/sh
 
 clear
 catkin build -j4
