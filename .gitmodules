@@ -4,6 +4,10 @@
 [submodule "src/mav_comm"]
 	path = src/mav_comm
 	url = https://github.com/ethz-asl/mav_comm.git
+[submodule "src/mavlink"]
+	path = src/mavlink
+	url = https://github.com/mavlink/mavlink-gbp-release
+	branch = upstream
 [submodule "src/catkin_simple"]
 	path = src/catkin_simple
 	url = https://github.com/catkin/catkin_simple
