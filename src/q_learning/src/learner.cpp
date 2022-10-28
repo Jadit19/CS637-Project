@@ -15,8 +15,8 @@ int main(int argc, char** argv){
 
     msg.message.data = "Parameters post tuning";
     msg.kp = 1;
-    msg.ki = 0;
-    msg.kd = 0;
+    msg.ki = 0.1;
+    msg.kd = 0.1;
 
     while (ros::ok()){
         ros::spinOnce();

@@ -7,6 +7,7 @@
 #include <q_learning/data.h>
 
 int RATE = 30;
+double dt = 1.0 / double(RATE);
 
 double kp = 0;
 double ki = 0;
@@ -18,6 +19,9 @@ double altitude;
 double targetAltitude = 2;
 std::vector<double> angularVel(6);
 
+double prevErr = targetAltitude;
+double integralErr = 0;
+
 mav_msgs::RollPitchYawrateThrust thrust;
 
 void noThrust(){
@@ -26,9 +30,16 @@ void noThrust(){
 
 void setThrust(){
     double err = targetAltitude - altitude;
-    ROS_INFO("Error: %lf\n", err);
+    integralErr += err * dt;
+
     double proportionalThrust = kp * err;
-    thrust.thrust.z = fireflyMass*gravity + proportionalThrust;
+    double integralThrust = ki * integralErr;
+    double derivativeThrust = kd * (err-prevErr)/dt;
+    
+    thrust.thrust.z = proportionalThrust + integralThrust + derivativeThrust;
+    thrust.thrust.z += fireflyMass * gravity;
+    prevErr = err;
+    return;
 }
 
 void gainsCallback(const q_learning::dataConstPtr& msg){
@@ -40,7 +51,6 @@ void gainsCallback(const q_learning::dataConstPtr& msg){
 
 void poseCallback(const geometry_msgs::PoseConstPtr& msg){
     altitude = msg->position.z;
-    ROS_INFO("Altitude: %lf", altitude);
     setThrust();
     return;
 }
