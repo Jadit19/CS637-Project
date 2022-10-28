@@ -1,7 +1,9 @@
 #include <iostream>
+#include <vector>
 #include <ros/ros.h>
 
 #include <geometry_msgs/Pose.h>
+#include <mav_msgs/RollPitchYawrateThrust.h>
 #include <q_learning/data.h>
 
 int RATE = 30;
@@ -9,26 +11,24 @@ int RATE = 30;
 double kp = 0;
 double ki = 0;
 double kd = 0;
+double fireflyMass = 1.5;
+double gravity = 9.8;
 
 double altitude;
-double targetAltitude = 5;
-double baseVel = 150;
-double angular_vel[6];
+double targetAltitude = 2;
+std::vector<double> angularVel(6);
 
-mav_msgs::Actuators motor_speed;
+mav_msgs::RollPitchYawrateThrust thrust;
 
-void setAngularVel(double vel) {
-    for (int i=0; i<6; i++)
-        angular_vel[i] = vel;
+void noThrust(){
+    thrust.thrust.z = 0;
 }
 
-void setMotorSpeed(){
+void setThrust(){
     double err = targetAltitude - altitude;
-    double vel = kp * err * baseVel;
-    setAngularVel(vel);
-    std::cout << vel << std::endl;
-
-    motor_speed.angular_velocities = angular_vel;
+    ROS_INFO("Error: %lf\n", err);
+    double proportionalThrust = kp * err;
+    thrust.thrust.z = fireflyMass*gravity + proportionalThrust;
 }
 
 void gainsCallback(const q_learning::dataConstPtr& msg){
@@ -40,7 +40,8 @@ void gainsCallback(const q_learning::dataConstPtr& msg){
 
 void poseCallback(const geometry_msgs::PoseConstPtr& msg){
     altitude = msg->position.z;
-    setMotorSpeed();
+    ROS_INFO("Altitude: %lf", altitude);
+    setThrust();
     return;
 }
 
@@ -50,14 +51,15 @@ int main(int argc, char** argv){
 
     ros::Subscriber sub_gains_ = nh.subscribe<q_learning::data>("/learner", RATE, gainsCallback);
     ros::Subscriber sub_pose_ = nh.subscribe<geometry_msgs::Pose>("/firefly/ground_truth/pose", RATE, poseCallback);
-    ros::Publisher pub_speed_ = nh.advertise<mav_msgs::Actuators>("/firefly/command/motor_speed", RATE);
-
+    ros::Publisher pub_thrust_ = nh.advertise<mav_msgs::RollPitchYawrateThrust>("/firefly/command/roll_pitch_yawrate_thrust", RATE);
     ros::Rate loopRate(RATE);
+
+    noThrust();
 
     while (ros::ok()){
         ros::spinOnce();
 
-        pub_speed_.publish(motor_speed);
+        pub_thrust_.publish(thrust);
 
         loopRate.sleep();
     }

@@ -4,7 +4,9 @@
     <include file="$(find q_learning)/launch/demo.launch" />
     <include file="$(find rotors_gazebo)/launch/mav.launch">
         <arg name="paused" default="false" />
+        <arg name="mav_name" default="firefly" />
     </include>
+    <include file="$(find mav_lowlevel_attitude_controller)/launch/mav_lowlevel_controller.launch" />
 
     <node name="controller" pkg="controller" type="controller" output="screen" />
 </launch>
