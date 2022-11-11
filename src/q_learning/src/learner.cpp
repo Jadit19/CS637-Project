@@ -14,9 +14,9 @@ int main(int argc, char** argv){
     ros::Rate loopRate(RATE);
 
     msg.message.data = "Parameters post tuning";
-    msg.kp = 1;
-    msg.ki = 0.1;
-    msg.kd = 0.1;
+    msg.kp = 49.9;
+    msg.ki = 0;
+    msg.kd = 0;
 
     while (ros::ok()){
         ros::spinOnce();

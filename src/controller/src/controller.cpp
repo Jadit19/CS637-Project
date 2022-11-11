@@ -21,6 +21,7 @@ std::vector<double> angularVel(6);
 
 double prevErr = targetAltitude;
 double integralErr = 0;
+double derivativeErr = 0;
 
 mav_msgs::RollPitchYawrateThrust thrust;
 
@@ -31,10 +32,11 @@ void noThrust(){
 void setThrust(){
     double err = targetAltitude - altitude;
     integralErr += err * dt;
+    derivativeErr = (err-prevErr) / dt;
 
     double proportionalThrust = kp * err;
     double integralThrust = ki * integralErr;
-    double derivativeThrust = kd * (err-prevErr)/dt;
+    double derivativeThrust = kd * derivativeErr;
     
     thrust.thrust.z = proportionalThrust + integralThrust + derivativeThrust;
     thrust.thrust.z += fireflyMass * gravity;
