@@ -8,5 +8,7 @@
     </include>
     <include file="$(find mav_lowlevel_attitude_controller)/launch/mav_lowlevel_controller.launch" />
 
+    <rosparam file="$(find controller)/config/params.yaml" />
+
     <node name="controller" pkg="controller" type="controller" output="screen" />
 </launch>
