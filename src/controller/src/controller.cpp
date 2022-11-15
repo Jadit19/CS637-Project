@@ -6,6 +6,7 @@
 #include <std_msgs/Float64.h>
 #include <mav_msgs/RollPitchYawrateThrust.h>
 #include <q_learning/data.h>
+#include <controller/altitude.h>
 
 // Paramas
 int RATE;
@@ -58,9 +59,11 @@ void poseCallback(const geometry_msgs::PoseConstPtr &msg)
     setThrust(msg->position.z);
     return;
 }
-void altitudeCallback(const std_msgs::Float64 &altitude)
+
+void altitudeCallback(const controller::altitudeConstPtr &msg)
 {
-    targetAltitude = altitude
+    targetAltitude = msg->data;
+    return;
 }
 
 int main(int argc, char **argv)
@@ -77,7 +80,7 @@ int main(int argc, char **argv)
 
     ros::Subscriber sub_gains_ = nh.subscribe<q_learning::data>("/learner", RATE, gainsCallback);
     ros::Subscriber sub_pose_ = nh.subscribe<geometry_msgs::Pose>("/firefly/ground_truth/pose", RATE, poseCallback);
-    ros::Subscriber sub_altitude_ = nh.subscribe<std_msgs::Float64>("/firefly/altitude", RATE, altitudeCallback);
+    ros::Subscriber sub_altitude_ = nh.subscribe<controller::altitude>("/altitude", RATE, altitudeCallback);
     ros::Publisher pub_thrust_ = nh.advertise<mav_msgs::RollPitchYawrateThrust>("/firefly/command/roll_pitch_yawrate_thrust", RATE);
     ros::Rate loopRate(RATE);
 

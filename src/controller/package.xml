@@ -57,6 +57,11 @@
   <depend>mav_msgs</depend>
   <depend>q_learning</depend>
 
+  <!-- For custom messages -->
+  <depend>std_msgs</depend>
+  <depend>message_generation</depend>
+  <depend>message_runtime</depend>
+
   <!-- The export tag contains other, unspecified, tags -->
   <export>
     <!-- Other tools can request additional information be placed here -->

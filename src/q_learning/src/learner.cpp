@@ -6,11 +6,13 @@
 int RATE;
 q_learning::data msg;
 
-int main(int argc, char** argv){
+int main(int argc, char **argv)
+{
     ros::init(argc, argv, "learner");
     ros::NodeHandle nh;
 
-    if (!nh.getParam("rate", RATE)){
+    if (!nh.getParam("rate", RATE))
+    {
         ROS_ERROR("Couldn't load params!");
         return 1;
     }
@@ -23,7 +25,8 @@ int main(int argc, char** argv){
     msg.ki = 0.1;
     msg.kd = 100;
 
-    while (ros::ok()){
+    while (ros::ok())
+    {
         ros::spinOnce();
 
         pub_gains_.publish(msg);
