@@ -3,6 +3,7 @@
 #include <ros/ros.h>
 
 #include <geometry_msgs/Pose.h>
+#include <std_msgs/Float64.h>
 #include <mav_msgs/RollPitchYawrateThrust.h>
 #include <q_learning/data.h>
 
@@ -23,42 +24,52 @@ double derivativeErr = 0;
 
 mav_msgs::RollPitchYawrateThrust thrust;
 
-void noThrust(){
+void noThrust()
+{
     thrust.thrust.z = 0;
 }
 
-void setThrust(double altitude){
+void setThrust(double altitude)
+{
     double err = targetAltitude - altitude;
     integralErr += err * dt;
-    derivativeErr = (err-prevErr) / dt;
+    derivativeErr = (err - prevErr) / dt;
 
     double proportionalThrust = kp * err;
     double integralThrust = ki * integralErr;
     double derivativeThrust = kd * derivativeErr;
-    
+
     thrust.thrust.z = proportionalThrust + integralThrust + derivativeThrust;
     thrust.thrust.z += fireflyMass * gravity;
     prevErr = err;
     return;
 }
 
-void gainsCallback(const q_learning::dataConstPtr& msg){
+void gainsCallback(const q_learning::dataConstPtr &msg)
+{
     kp = msg->kp;
     ki = msg->ki;
     kd = msg->kd;
     return;
 }
 
-void poseCallback(const geometry_msgs::PoseConstPtr& msg){
+void poseCallback(const geometry_msgs::PoseConstPtr &msg)
+{
     setThrust(msg->position.z);
     return;
 }
+void altitudeCallback(const std_msgs::Float64 &altitude)
+{
+    targetAltitude = altitude
+}
 
-int main(int argc, char** argv){
+int main(int argc, char **argv)
+{
     ros::init(argc, argv, "controller");
     ros::NodeHandle nh;
 
-    if (!nh.getParam("rate", RATE) || !nh.getParam("mass", fireflyMass) || !nh.getParam("gravity", gravity) || !nh.getParam("altitude", targetAltitude)){
+    if (!nh.getParam("rate", RATE) || !nh.getParam("mass", fireflyMass) || !nh.getParam("gravity", gravity) || !nh.getParam("altitude", targetAltitude))
+    {
         ROS_ERROR("Couldn't load params!");
         return 1;
     }
@@ -66,12 +77,14 @@ int main(int argc, char** argv){
 
     ros::Subscriber sub_gains_ = nh.subscribe<q_learning::data>("/learner", RATE, gainsCallback);
     ros::Subscriber sub_pose_ = nh.subscribe<geometry_msgs::Pose>("/firefly/ground_truth/pose", RATE, poseCallback);
+    ros::Subscriber sub_altitude_ = nh.subscribe<std_msgs::Float64>("/firefly/altitude", RATE, altitudeCallback);
     ros::Publisher pub_thrust_ = nh.advertise<mav_msgs::RollPitchYawrateThrust>("/firefly/command/roll_pitch_yawrate_thrust", RATE);
     ros::Rate loopRate(RATE);
 
     noThrust();
 
-    while (ros::ok()){
+    while (ros::ok())
+    {
         ros::spinOnce();
 
         pub_thrust_.publish(thrust);
